@@ -1,0 +1,24 @@
+all:
+  children:
+    2960misc:
+      hosts:
+        {% for node in groups['2960misc'] %}{% if hostvars[node]['upgrade_ready'] is defined %}{{hostvars[node]['inventory_hostname']}}:
+        {% endif %}{% endfor %}
+    2960S:
+      hosts:
+        {% for node in groups['2960S'] %}{% if hostvars[node]['upgrade_ready'] is defined %}{{hostvars[node]['inventory_hostname']}}:
+        {% endif %}{% endfor %}
+    2960X:
+      hosts:
+        {% for node in groups['2960X'] %}{% if hostvars[node]['upgrade_ready'] is defined %}{{hostvars[node]['inventory_hostname']}}:
+        {% endif %}{% endfor %}
+    2960CG:
+      hosts:
+        {% for node in groups['2960CG'] %}{% if hostvars[node]['upgrade_ready'] is defined %}{{hostvars[node]['inventory_hostname']}}:
+        {% endif %}{% endfor %}
+    2960G:
+      hosts:
+        {% for node in groups['2960G'] %}{% if hostvars[node]['upgrade_ready'] is defined %}{{hostvars[node]['inventory_hostname']}}:
+        {% endif %}{% endfor %}
+
+

@@ -1,0 +1,78 @@
+---
+- name: UpgradePreFlightChecks
+  connection: local
+  gather_facts: no
+  hosts: all
+  vars_prompt:
+    - name: "username"
+      prompt: "Enter login username"
+      private: no
+    - name: "password"
+      prompt: "Enter login password"
+      private: yes
+  tasks:
+  - name: Gather Facts
+    ios_facts:
+      provider: 
+        host: "{{inventory_hostname}}"
+        username: "{{username}}"
+        password: "{{password}}"
+      gather_subset: "!hardware"
+    ignore_errors: yes
+
+  - name: Define Nodes For Upgrade
+    set_fact: 
+      needs_upgrade: true
+    when: ansible_net_version != desired_version
+
+  - name: Check Filesystem on Upgrade Devices
+    ntc_show_command:
+      connection: ssh
+      platform: "cisco_ios"
+      command: 'dir'
+      host: "{{inventory_hostname}}"
+      username: "{{username}}"
+      password: "{{password}}"
+      template_dir: /usr/share/ansible/plugins/modules/ntc-ansible/ntc-templates/templates/
+    when: 
+      - needs_upgrade is defined
+    register: dir_output
+
+  - name: Check for desired_image already on filesystem
+    set_fact:
+      needs_image: true
+    when: 
+      - needs_upgrade is defined
+      - not dir_output.response | selectattr("name", "search", desired_image) | map(attribute="name") | list
+
+  - name: Display freespace check if not enough space
+    debug: msg="Not Enough space exists"
+    when: 
+      - needs_upgrade is defined
+      - needs_image is defined
+      - desired_image_size|int > dir_output.response[0].total_free|int
+
+  - name: Create needs upgrade+freespace remediation list
+    lineinfile:
+      dest: ./needs-freespace.txt
+      line: "{{ inventory_hostname }}"
+      create: yes
+    when: 
+      - needs_upgrade is defined and needs_image is defined
+      - desired_image_size|int > dir_output.response[0].total_free|int
+
+  - name: Assert ready for upgrade
+    set_fact:
+      upgrade_ready: true
+    when: 
+      - needs_upgrade is defined
+      - needs_image is defined
+      - desired_image_size|int < dir_output.response[0].total_free|int
+
+  - name: Generate Report
+    template:
+      src: UpgradeInventory.j2
+      dest: ./UpgradeInventory.yml
+      trim_blocks: false
+    delegate_to: localhost
+    run_once: true

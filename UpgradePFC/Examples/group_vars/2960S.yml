@@ -1,0 +1,5 @@
+---
+model_category: 2960S
+desired_version: 15.2(2)E9
+desired_image: c2960s-universalk9-mz.152-2.E9.bin
+desired_image_size: 16800768

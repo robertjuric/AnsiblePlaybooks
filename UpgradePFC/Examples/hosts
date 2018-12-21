@@ -1,0 +1,19 @@
+all:
+  children:
+    2960misc:
+      hosts:
+        your-ip:
+    2960S:
+      hosts:
+        your-ip:
+    2960X:
+      hosts:
+        your-ip:
+    2960CG:
+      hosts:
+        your-ip:       
+    2960G:
+      hosts:
+        your-ip:
+  vars:
+    netos: ios

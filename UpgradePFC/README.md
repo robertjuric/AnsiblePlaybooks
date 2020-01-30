@@ -2,6 +2,23 @@
 
 A playbook for running various checks before attempting to transfer an image for upgrade. I wanted to take a complete inventory and generate a new inventory of devices which are ready for an image transfer. The exact tasks and checks are described below. 
 
+## Workflow
+Running UpgradePFC.yml
+Will gatherfacts and compare running version to desired version, if they do not match, needs_upgrade=true
+Will check filesystem, if desired version image does not exist, needs_image=true
+If needs_upgrade=true and needs_image=true, it will check for freespace.
+Will generate a Needs-Freespace.txt remediation list for the inventory that requires freespace to be allocated.
+Manually remediate list and rerun the playbook
+If needs_upgrade=true and needs_image=true, and freespace exists then upgrade_ready=true
+Will generate an UpgradeInventory.yml
+Need to add a step to generate an InstallInventory.yml to pass to UpgradeCopy.yml
+
+Can then skip over to EnableSCP.yml to push SCP configuration to UpgradeInventory
+If you want to assume devices need image, Can then skip over to UpgradeCopy.yml to transfer images
+Then execute InstallOS.yml to set boot variables
+Execute MakeItSo to reboot device and complete IOS install
+
+
 ## Getting Started
 
 This playbook has a few extra requirements you may need to add to your Ansible environment.
